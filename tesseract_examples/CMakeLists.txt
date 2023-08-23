@@ -46,6 +46,7 @@ add_library(
   src/freespace_hybrid_example.cpp
   src/freespace_ompl_example.cpp
   src/glass_upright_example.cpp
+  src/xarm7_trajopt.cpp
   src/online_planning_example.cpp
   src/pick_and_place_example.cpp
   src/puzzle_piece_auxillary_axes_example.cpp
@@ -111,6 +112,7 @@ add_example(${PROJECT_NAME}_car_seat_example src/car_seat_example_node.cpp)
 add_example(${PROJECT_NAME}_freespace_hybrid_example src/freespace_hybrid_example_node.cpp)
 add_example(${PROJECT_NAME}_freespace_ompl_example src/freespace_ompl_example_node.cpp)
 add_example(${PROJECT_NAME}_glass_upright_example src/glass_upright_example_node.cpp)
+add_example(${PROJECT_NAME}_xarm7_trajopt src/xarm7_trajopt_node.cpp)
 add_example(${PROJECT_NAME}_online_planning_example src/online_planning_example_node.cpp)
 add_example(${PROJECT_NAME}_pick_and_place_example src/pick_and_place_example_node.cpp)
 add_example(${PROJECT_NAME}_puzzle_piece_auxillary_axes_example src/puzzle_piece_auxillary_axes_example_node.cpp)
@@ -136,6 +138,7 @@ configure_package(
           ${PROJECT_NAME}_freespace_hybrid_example
           ${PROJECT_NAME}_freespace_ompl_example
           ${PROJECT_NAME}_glass_upright_example
+          ${PROJECT_NAME}_xarm7_trajopt
           ${PROJECT_NAME}_online_planning_example
           ${PROJECT_NAME}_pick_and_place_example
           ${PROJECT_NAME}_puzzle_piece_auxillary_axes_example
