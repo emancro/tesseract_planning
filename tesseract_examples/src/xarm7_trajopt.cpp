@@ -91,7 +91,7 @@ tesseract_environment::Command::Ptr Xarm7Trajopt::addSphere()
   link_sphere.collision.push_back(collision);
 
   Joint joint_sphere("joint_sphere_attached");
-  joint_sphere.parent_link_name = "link_base";
+  joint_sphere.parent_link_name = "base_link";
   joint_sphere.child_link_name = link_sphere.getName();
   joint_sphere.type = JointType::FIXED;
 
@@ -121,11 +121,18 @@ bool Xarm7Trajopt::run()
   Eigen::VectorXd joint_start_pos(7);
   joint_start_pos(0) = -0.4;
   joint_start_pos(1) = 0.2762;
-  joint_start_pos(2) = 0.0;
+  joint_start_pos(2) = -0.3;
   joint_start_pos(3) = 1.3348;
   joint_start_pos(4) = 0.0;
   joint_start_pos(5) = 1.4959;
   joint_start_pos(6) = 0.0;
+  // joint_start_pos(0) = -0.4;
+  // joint_start_pos(1) = 0.2762;
+  // joint_start_pos(2) = 0.0;
+  // joint_start_pos(3) = 1.3348;
+  // joint_start_pos(4) = 0.0;
+  // joint_start_pos(5) = 1.4959;
+  // joint_start_pos(6) = 0.0;
 
   Eigen::VectorXd joint_end_pos(7);
   joint_end_pos(0) = 0.4;

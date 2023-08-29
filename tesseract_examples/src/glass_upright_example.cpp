@@ -91,7 +91,7 @@ tesseract_environment::Command::Ptr GlassUprightExample::addSphere()
   link_sphere.collision.push_back(collision);
 
   Joint joint_sphere("joint_sphere_attached");
-  joint_sphere.parent_link_name = "base_link";
+  joint_sphere.parent_link_name = "link_base";
   joint_sphere.child_link_name = link_sphere.getName();
   joint_sphere.type = JointType::FIXED;
 
@@ -110,19 +110,19 @@ bool GlassUprightExample::run()
 
   // Set the robot initial state
   std::vector<std::string> joint_names;
-  joint_names.emplace_back("joint_a1");
-  joint_names.emplace_back("joint_a2");
-  joint_names.emplace_back("joint_a3");
-  joint_names.emplace_back("joint_a4");
-  joint_names.emplace_back("joint_a5");
-  joint_names.emplace_back("joint_a6");
-  joint_names.emplace_back("joint_a7");
+  joint_names.emplace_back("joint1");
+  joint_names.emplace_back("joint2");
+  joint_names.emplace_back("joint3");
+  joint_names.emplace_back("joint4");
+  joint_names.emplace_back("joint5");
+  joint_names.emplace_back("joint6");
+  joint_names.emplace_back("joint7");
 
   Eigen::VectorXd joint_start_pos(7);
   joint_start_pos(0) = -0.4;
   joint_start_pos(1) = 0.2762;
   joint_start_pos(2) = 0.0;
-  joint_start_pos(3) = -1.3348;
+  joint_start_pos(3) = 1.3348;
   joint_start_pos(4) = 0.0;
   joint_start_pos(5) = 1.4959;
   joint_start_pos(6) = 0.0;
@@ -131,7 +131,7 @@ bool GlassUprightExample::run()
   joint_end_pos(0) = 0.4;
   joint_end_pos(1) = 0.2762;
   joint_end_pos(2) = 0.0;
-  joint_end_pos(3) = -1.3348;
+  joint_end_pos(3) = 1.3348;
   joint_end_pos(4) = 0.0;
   joint_end_pos(5) = 1.4959;
   joint_end_pos(6) = 0.0;

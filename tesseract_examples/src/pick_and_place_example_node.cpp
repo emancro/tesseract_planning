@@ -35,9 +35,9 @@ int main(int /*argc*/, char** /*argv*/)
 {
   auto locator = std::make_shared<TesseractSupportResourceLocator>();
   tesseract_common::fs::path urdf_path =
-      locator->locateResource("package://tesseract_support/urdf/pick_and_place_plan.urdf")->getFilePath();
+      locator->locateResource("/home/febert/tesseract_ws2/src/tesseract/tesseract_support/urdf/xarm7.urdf")->getFilePath();
   tesseract_common::fs::path srdf_path =
-      locator->locateResource("package://tesseract_support/urdf/pick_and_place_plan.srdf")->getFilePath();
+      locator->locateResource("/home/febert/tesseract_ws2/src/tesseract/tesseract_support/urdf/xarm7.srdf")->getFilePath();
   auto env = std::make_shared<Environment>();
   if (!env->init(urdf_path, srdf_path, locator))
     exit(1);

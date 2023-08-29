@@ -60,8 +60,8 @@ using tesseract_common::ManipulatorInfo;
 const double OFFSET = 0.005;
 
 const std::string LINK_BOX_NAME = "box";
-const std::string LINK_BASE_NAME = "world";
-const std::string LINK_END_EFFECTOR_NAME = "iiwa_tool0";
+const std::string LINK_BASE_NAME = "base_link";
+const std::string LINK_END_EFFECTOR_NAME = "tool0";
 const std::string DISCRETE_CONTACT_CHECK_TASK_NAME = "DiscreteContactCheckTask";
 const std::string TRAJOPT_DEFAULT_NAMESPACE = "TrajOptMotionPlannerTask";
 namespace tesseract_examples
@@ -89,7 +89,7 @@ Command::Ptr PickAndPlaceExample::addBox(double box_x, double box_y, double box_
   link_box.collision.push_back(collision);
 
   Joint joint_box("joint_box");
-  joint_box.parent_link_name = "workcell_base";
+  joint_box.parent_link_name = "base_link";
   joint_box.child_link_name = LINK_BOX_NAME;
   joint_box.type = JointType::FIXED;
   joint_box.parent_to_joint_origin_transform = Eigen::Isometry3d::Identity();
@@ -116,21 +116,21 @@ bool PickAndPlaceExample::run()
 
   // Set the robot initial state
   std::vector<std::string> joint_names;
-  joint_names.emplace_back("iiwa_joint_a1");
-  joint_names.emplace_back("iiwa_joint_a2");
-  joint_names.emplace_back("iiwa_joint_a3");
-  joint_names.emplace_back("iiwa_joint_a4");
-  joint_names.emplace_back("iiwa_joint_a5");
-  joint_names.emplace_back("iiwa_joint_a6");
-  joint_names.emplace_back("iiwa_joint_a7");
+  joint_names.emplace_back("joint1");
+  joint_names.emplace_back("joint2");
+  joint_names.emplace_back("joint3");
+  joint_names.emplace_back("joint4");
+  joint_names.emplace_back("joint5");
+  joint_names.emplace_back("joint6");
+  joint_names.emplace_back("joint7");
 
   Eigen::VectorXd joint_pos(7);
-  joint_pos(0) = 0.0;
+  joint_pos(0) = 1.57;
   joint_pos(1) = 0.0;
   joint_pos(2) = 0.0;
-  joint_pos(3) = -1.57;
+  joint_pos(3) = 1.57;
   joint_pos(4) = 0.0;
-  joint_pos(5) = 0.0;
+  joint_pos(5) = 1.57;
   joint_pos(6) = 0.0;
 
   env_->setState(joint_names, joint_pos);
@@ -271,8 +271,8 @@ bool PickAndPlaceExample::run()
   cmds.push_back(std::make_shared<tesseract_environment::MoveLinkCommand>(joint_box2));
   tesseract_common::AllowedCollisionMatrix add_ac;
   add_ac.addAllowedCollision(LINK_BOX_NAME, LINK_END_EFFECTOR_NAME, "Never");
-  add_ac.addAllowedCollision(LINK_BOX_NAME, "iiwa_link_7", "Never");
-  add_ac.addAllowedCollision(LINK_BOX_NAME, "iiwa_link_6", "Never");
+  add_ac.addAllowedCollision(LINK_BOX_NAME, "link7", "Never");
+  add_ac.addAllowedCollision(LINK_BOX_NAME, "link6", "Never");
   cmds.push_back(std::make_shared<tesseract_environment::ModifyAllowedCollisionsCommand>(
       add_ac, tesseract_environment::ModifyAllowedCollisionsType::ADD));
   env_->applyCommands(cmds);
