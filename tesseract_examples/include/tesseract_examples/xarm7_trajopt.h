@@ -45,7 +45,8 @@ public:
   Xarm7Trajopt(tesseract_environment::Environment::Ptr env,
                       tesseract_visualization::Visualization::Ptr plotter = nullptr,
                       bool ifopt = false,
-                      bool debug = false);
+                      bool debug = false,
+                      Eigen::Vector3d sphere1 = Eigen::Vector3d(0, 0, 0));
   ~Xarm7Trajopt() override = default;
   Xarm7Trajopt(const Xarm7Trajopt&) = default;
   Xarm7Trajopt& operator=(const Xarm7Trajopt&) = default;
@@ -57,7 +58,8 @@ public:
 private:
   bool ifopt_;
   bool debug_;
-  static tesseract_environment::Command::Ptr addSphere();
+  Eigen::Vector3d sphere1_;
+  static tesseract_environment::Command::Ptr addSphere(Eigen::Vector3d sphere1);
 };
 
 }  // namespace tesseract_examples

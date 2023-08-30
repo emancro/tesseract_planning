@@ -47,6 +47,7 @@ TESSERACT_COMMON_IGNORE_WARNINGS_POP
 
 #include <tesseract_motion_planners/trajopt_ifopt/profile/trajopt_ifopt_default_composite_profile.h>
 #include <tesseract_motion_planners/trajopt/profile/trajopt_default_composite_profile.h>
+#include <tesseract_motion_planners/trajopt/profile/trajopt_default_solver_profile.h>
 
 #include <tesseract_motion_planners/trajopt_ifopt/profile/trajopt_ifopt_default_plan_profile.h>
 #include <tesseract_motion_planners/trajopt/profile/trajopt_default_plan_profile.h>
@@ -69,19 +70,21 @@ namespace tesseract_examples
 Xarm7Trajopt::Xarm7Trajopt(tesseract_environment::Environment::Ptr env,
                                          tesseract_visualization::Visualization::Ptr plotter,
                                          bool ifopt,
-                                         bool debug)
-  : Example(std::move(env), std::move(plotter)), ifopt_(ifopt), debug_(debug)
+                                         bool debug,
+                                         Eigen::Vector3d sphere1
+                                         )
+  : Example(std::move(env), std::move(plotter)), ifopt_(ifopt), debug_(debug), sphere1_(sphere1)
 {
 }
 
-tesseract_environment::Command::Ptr Xarm7Trajopt::addSphere()
+tesseract_environment::Command::Ptr Xarm7Trajopt::addSphere(Eigen::Vector3d position)
 {
   // Add sphere to environment
   Link link_sphere("sphere_attached");
 
   Visual::Ptr visual = std::make_shared<Visual>();
   visual->origin = Eigen::Isometry3d::Identity();
-  visual->origin.translation() = Eigen::Vector3d(0.5, 0, 0.55);
+  visual->origin.translation() = position;
   visual->geometry = std::make_shared<tesseract_geometry::Sphere>(0.15);
   link_sphere.visual.push_back(visual);
 
@@ -101,7 +104,8 @@ tesseract_environment::Command::Ptr Xarm7Trajopt::addSphere()
 bool Xarm7Trajopt::run()
 {
   // Add sphere to environment
-  Command::Ptr cmd = addSphere();
+  // Eigen::Vector3d pos(0.5, 0, 0.55);
+  Command::Ptr cmd = addSphere(sphere1_);
   if (!env_->applyCommand(cmd))
     return false;
 

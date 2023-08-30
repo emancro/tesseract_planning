@@ -135,6 +135,32 @@ bool PickAndPlaceExample::run()
 
   env_->setState(joint_names, joint_pos);
 
+  tesseract_common::VectorIsometry3d transforms;
+  transforms = env_->getLinkTransforms();
+
+  // Eigen::Isometry3d last_transform;
+  // last_transform = transforms.back();
+
+  Eigen::Matrix3d m;
+  Eigen::Vector3d v;
+
+  for(int i=0; i < transforms.size(); i++){
+    std::cout << "transform: " << std::endl << i << std::endl;
+    m = transforms[i].rotation();
+    v = transforms[i].translation();
+    std::cout << "Rotation: " << std::endl << m << std::endl;
+    std::cout << "Translation: " << std::endl << v << std::endl;
+    Eigen::Quaterniond quat(m.cast<double>());
+
+    std::cout << "Debug: " << "myQuaternion.w() = " << quat.w() << std::endl; //Print out the scalar
+    std::cout << "Debug: " << "myQuaternion.vec() = " << quat.vec() << std::endl; //Print out the orientation vector
+  }
+
+  Eigen::Quaterniond selected_quat(transforms[9].rotation().cast<double>());
+  std::cout << "selected_quat: " << "myQuaternion.w() = " << selected_quat.w() << std::endl; //Print out the scalar
+  std::cout << "selected_quat: " << "myQuaternion.vec() = " << selected_quat.vec() << std::endl; //Print out the orientation vector
+
+
   // Add simulated box to environment
   Command::Ptr cmd = addBox(box_position_[0], box_position_[1], box_size_);
   if (!env_->applyCommand(cmd))
@@ -162,9 +188,9 @@ bool PickAndPlaceExample::run()
 
   // Define the final pose (on top of the box)
   Eigen::Isometry3d pick_final_pose;
-  pick_final_pose.linear() = Eigen::Quaterniond(0.0, 0.0, 1.0, 0.0).matrix();
-  pick_final_pose.translation() =
-      Eigen::Vector3d(box_position_[0], box_position_[1], box_size_ + 0.772 + OFFSET);  // Offset for the table
+  pick_final_pose.linear() = selected_quat.matrix();
+  pick_final_pose.translation() = Eigen::Vector3d(0, 0.471, 0.3);  // Offset for the table
+
   CartesianWaypointPoly pick_wp1{ CartesianWaypoint(pick_final_pose) };
 
   // Define the approach pose
@@ -183,7 +209,7 @@ bool PickAndPlaceExample::run()
   // Add Instructions to program
   pick_program.appendMoveInstruction(start_instruction);
   pick_program.appendMoveInstruction(pick_plan_a0);
-  pick_program.appendMoveInstruction(pick_plan_a1);
+  // pick_program.appendMoveInstruction(pick_plan_a1);
 
   // Print Diagnostics
   pick_program.print("Program: ");
