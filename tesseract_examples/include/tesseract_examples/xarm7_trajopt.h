@@ -46,7 +46,10 @@ public:
                       tesseract_visualization::Visualization::Ptr plotter = nullptr,
                       bool ifopt = false,
                       bool debug = false,
-                      Eigen::Vector3d sphere1 = Eigen::Vector3d(0, 0, 0));
+                      Eigen::Vector3d sphere1 = Eigen::Vector3d(0, 0, 0),
+                      Eigen::VectorXd arm_start = Eigen::VectorXd::Zero(7),
+                      Eigen::VectorXd arm_end = Eigen::VectorXd::Zero(7)
+                      );
   ~Xarm7Trajopt() override = default;
   Xarm7Trajopt(const Xarm7Trajopt&) = default;
   Xarm7Trajopt& operator=(const Xarm7Trajopt&) = default;
@@ -59,6 +62,8 @@ private:
   bool ifopt_;
   bool debug_;
   Eigen::Vector3d sphere1_;
+  Eigen::VectorXd arm_start_;
+  Eigen::VectorXd arm_end_;
   static tesseract_environment::Command::Ptr addSphere(Eigen::Vector3d sphere1);
 };
 

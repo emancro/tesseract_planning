@@ -71,9 +71,11 @@ Xarm7Trajopt::Xarm7Trajopt(tesseract_environment::Environment::Ptr env,
                                          tesseract_visualization::Visualization::Ptr plotter,
                                          bool ifopt,
                                          bool debug,
-                                         Eigen::Vector3d sphere1
+                                         Eigen::Vector3d sphere1,
+                                         Eigen::VectorXd arm_start,
+                                         Eigen::VectorXd arm_end
                                          )
-  : Example(std::move(env), std::move(plotter)), ifopt_(ifopt), debug_(debug), sphere1_(sphere1)
+  : Example(std::move(env), std::move(plotter)), ifopt_(ifopt), debug_(debug), sphere1_(sphere1), arm_start_(arm_start), arm_end_(arm_end)
 {
 }
 
@@ -123,29 +125,25 @@ bool Xarm7Trajopt::run()
   joint_names.emplace_back("joint7");
 
   Eigen::VectorXd joint_start_pos(7);
-  joint_start_pos(0) = -0.4;
-  joint_start_pos(1) = 0.2762;
-  joint_start_pos(2) = -0.3;
-  joint_start_pos(3) = 1.3348;
-  joint_start_pos(4) = 0.0;
-  joint_start_pos(5) = 1.4959;
-  joint_start_pos(6) = 0.0;
+  joint_start_pos = arm_start_;
   // joint_start_pos(0) = -0.4;
   // joint_start_pos(1) = 0.2762;
-  // joint_start_pos(2) = 0.0;
+  // joint_start_pos(2) = -0.3;
   // joint_start_pos(3) = 1.3348;
   // joint_start_pos(4) = 0.0;
   // joint_start_pos(5) = 1.4959;
   // joint_start_pos(6) = 0.0;
 
+
   Eigen::VectorXd joint_end_pos(7);
-  joint_end_pos(0) = 0.4;
-  joint_end_pos(1) = 0.2762;
-  joint_end_pos(2) = 0.0;
-  joint_end_pos(3) = 1.3348;
-  joint_end_pos(4) = 0.0;
-  joint_end_pos(5) = 1.4959;
-  joint_end_pos(6) = 0.0;
+  joint_end_pos = arm_end_;
+  // joint_end_pos(0) = 0.5;
+  // joint_end_pos(1) = 0.2762;
+  // joint_end_pos(2) = 0.0;
+  // joint_end_pos(3) = 1.3348;
+  // joint_end_pos(4) = 0.0;
+  // joint_end_pos(5) = 1.4959;
+  // joint_end_pos(6) = 0.0;
 
   env_->setState(joint_names, joint_start_pos);
 
@@ -162,18 +160,18 @@ bool Xarm7Trajopt::run()
 
   // Create Program
   CompositeInstruction program(
-      "UPRIGHT", CompositeInstructionOrder::ORDERED, ManipulatorInfo("manipulator", "base_link", "tool0"));
+      "FREESPACE", CompositeInstructionOrder::ORDERED, ManipulatorInfo("manipulator", "base_link", "tool0"));
 
   // Start and End Joint Position for the program
   StateWaypointPoly wp0{ StateWaypoint(joint_names, joint_start_pos) };
   StateWaypointPoly wp1{ StateWaypoint(joint_names, joint_end_pos) };
 
-  MoveInstruction start_instruction(wp0, MoveInstructionType::LINEAR, "UPRIGHT");
+  MoveInstruction start_instruction(wp0, MoveInstructionType::FREESPACE, "FREESPACE");
   start_instruction.setDescription("Start Instruction");
 
   // Plan freespace from start
   // Assign a linear motion so cartesian is defined as the target
-  MoveInstruction plan_f0(wp1, MoveInstructionType::LINEAR, "UPRIGHT");
+  MoveInstruction plan_f0(wp1, MoveInstructionType::FREESPACE, "FREESPACE");
   plan_f0.setDescription("freespace_plan");
 
   // Add Instructions to program
@@ -202,7 +200,7 @@ bool Xarm7Trajopt::run()
     composite_profile->smooth_accelerations = false;
     composite_profile->smooth_jerks = false;
     composite_profile->velocity_coeff = Eigen::VectorXd::Ones(1);
-    profiles->addProfile<TrajOptIfoptCompositeProfile>(TRAJOPT_IFOPT_DEFAULT_NAMESPACE, "UPRIGHT", composite_profile);
+    profiles->addProfile<TrajOptIfoptCompositeProfile>(TRAJOPT_IFOPT_DEFAULT_NAMESPACE, "FREESPACE", composite_profile);
 
     auto plan_profile = std::make_shared<TrajOptIfoptDefaultPlanProfile>();
     plan_profile->joint_coeff = Eigen::VectorXd::Ones(7);
@@ -210,7 +208,7 @@ bool Xarm7Trajopt::run()
     plan_profile->cartesian_coeff(0) = 0;
     plan_profile->cartesian_coeff(1) = 0;
     plan_profile->cartesian_coeff(2) = 0;
-    profiles->addProfile<TrajOptIfoptPlanProfile>(TRAJOPT_IFOPT_DEFAULT_NAMESPACE, "UPRIGHT", plan_profile);
+    profiles->addProfile<TrajOptIfoptPlanProfile>(TRAJOPT_IFOPT_DEFAULT_NAMESPACE, "FREESPACE", plan_profile);
   }
   else
   {
@@ -229,7 +227,7 @@ bool Xarm7Trajopt::run()
     composite_profile->smooth_accelerations = false;
     composite_profile->smooth_jerks = false;
     composite_profile->velocity_coeff = Eigen::VectorXd::Ones(1);
-    profiles->addProfile<TrajOptCompositeProfile>(TRAJOPT_DEFAULT_NAMESPACE, "UPRIGHT", composite_profile);
+    profiles->addProfile<TrajOptCompositeProfile>(TRAJOPT_DEFAULT_NAMESPACE, "FREESPACE", composite_profile);
 
     auto plan_profile = std::make_shared<TrajOptDefaultPlanProfile>();
     plan_profile->cartesian_coeff = Eigen::VectorXd::Constant(6, 1, 5);
@@ -238,7 +236,7 @@ bool Xarm7Trajopt::run()
     plan_profile->cartesian_coeff(2) = 0;
 
     // Add profile to Dictionary
-    profiles->addProfile<TrajOptPlanProfile>(TRAJOPT_DEFAULT_NAMESPACE, "UPRIGHT", plan_profile);
+    profiles->addProfile<TrajOptPlanProfile>(TRAJOPT_DEFAULT_NAMESPACE, "FREESPACE", plan_profile);
   }
 
   // Create task
