@@ -107,9 +107,9 @@ bool Xarm7Trajopt::run()
 {
   // Add sphere to environment
   // Eigen::Vector3d pos(0.5, 0, 0.55);
-  Command::Ptr cmd = addSphere(sphere1_);
-  if (!env_->applyCommand(cmd))
-    return false;
+  // Command::Ptr cmd = addSphere(sphere1_);
+  // if (!env_->applyCommand(cmd))
+  //   return false;
 
   if (plotter_ != nullptr)
     plotter_->waitForConnection();
