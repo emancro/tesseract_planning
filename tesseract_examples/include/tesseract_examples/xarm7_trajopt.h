@@ -48,7 +48,8 @@ public:
                       bool debug = false,
                       Eigen::Vector3d sphere1 = Eigen::Vector3d(0, 0, 0),
                       Eigen::VectorXd arm_start = Eigen::VectorXd::Zero(7),
-                      Eigen::VectorXd arm_end = Eigen::VectorXd::Zero(7)
+                      Eigen::VectorXd arm_end = Eigen::VectorXd::Zero(7),
+                      Eigen::Isometry3d final_pose = Eigen::Isometry3d::Identity()
                       );
   ~Xarm7Trajopt() override = default;
   Xarm7Trajopt(const Xarm7Trajopt&) = default;
@@ -64,6 +65,7 @@ private:
   Eigen::Vector3d sphere1_;
   Eigen::VectorXd arm_start_;
   Eigen::VectorXd arm_end_;
+  Eigen::Isometry3d final_pose_;
   static tesseract_environment::Command::Ptr addSphere(Eigen::Vector3d sphere1);
 };
 
