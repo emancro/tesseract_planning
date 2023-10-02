@@ -227,16 +227,16 @@ bool Xarm7Trajopt::run()
 
   auto plan_profile = std::make_shared<TrajOptDefaultPlanProfile>();
   plan_profile->cartesian_coeff = Eigen::VectorXd::Constant(6, 1, 5);
-  plan_profile->cartesian_coeff(0) = 0;
-  plan_profile->cartesian_coeff(1) = 0;
-  plan_profile->cartesian_coeff(2) = 0;
+  // plan_profile->cartesian_coeff(0) = 0;
+  // plan_profile->cartesian_coeff(1) = 0;
+  // plan_profile->cartesian_coeff(2) = 0;
 
   // Add profile to Dictionary
   profiles->addProfile<TrajOptPlanProfile>(TRAJOPT_DEFAULT_NAMESPACE, "FREESPACE", plan_profile);
 
-  // auto trajopt_solver_profile = std::make_shared<TrajOptDefaultSolverProfile>();
-  // trajopt_solver_profile->opt_info.max_iter = 100;
-  // profiles->addProfile<TrajOptSolverProfile>(TRAJOPT_DEFAULT_NAMESPACE, "FREESPACE", trajopt_solver_profile);
+  auto trajopt_solver_profile = std::make_shared<TrajOptDefaultSolverProfile>();
+  trajopt_solver_profile->opt_info.max_iter = 100;
+  profiles->addProfile<TrajOptSolverProfile>(TRAJOPT_DEFAULT_NAMESPACE, "FREESPACE", trajopt_solver_profile);
 
 
   // Create task
@@ -276,11 +276,34 @@ bool Xarm7Trajopt::run()
 
     plotter_->plotMarker(ToolpathMarker(toolpath));
     plotter_->plotTrajectory(trajectory, *state_solver);
+
+    // print trajecotry length:
+    std::cout << "trajectory length: " << trajectory.size() << std::endl;
+
+    // loop through joint_trajecotry and print
+    for (const auto& js : trajectory)
+    {
+      std::cout << "joint state " << std::endl;
+      assert(js.joint_names.size() == static_cast<unsigned>(js.position.size()));
+
+      for (int i = 0; i < js.position.size(); ++i)
+        std::cout << "pos"  <<  js.position(i) << std::endl;
+
+      for (int i = 0; i < js.velocity.size(); ++i)
+        std::cout << "vell"  << js.velocity(i) << std::endl;
+
+      for (int i = 0; i < js.acceleration.size(); ++i)
+        std::cout << "accel"  <<  js.acceleration(i) << std::endl;
+
+      std::cout << "time"  <<  js.time << std::endl;
+    }
+
+
   }
 
   // CONSOLE_BRIDGE_logInform("Final trajectory is collision free");
   std::cout << "success: " << input.isSuccessful() << std::endl;
-  input.isSuccessful();
+  return input.isSuccessful();
 }
 
 

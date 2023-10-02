@@ -399,6 +399,12 @@ task_composer_plugins:
                 conditional: true
                 inputs: [output_data]
                 outputs: [output_data]
+            RuckigTrajectorySmoothingTask:
+              class: RuckigTrajectorySmoothingTaskFactory
+              config:
+                conditional: true
+                inputs: [output_data]
+                outputs: [output_data]
           edges:
             - source: MinLengthTask
               destinations: [ErrorTask, TrajOptMotionPlannerTask]
@@ -407,6 +413,8 @@ task_composer_plugins:
             - source: DiscreteContactCheckTask
               destinations: [ErrorTask, IterativeSplineParameterizationTask]
             - source: IterativeSplineParameterizationTask
+              destinations: [ErrorTask, RuckigTrajectorySmoothingTask]
+            - source: RuckigTrajectorySmoothingTask
               destinations: [ErrorTask, DoneTask]
           terminals: [ErrorTask, DoneTask]
       TrajOptPipeline:
