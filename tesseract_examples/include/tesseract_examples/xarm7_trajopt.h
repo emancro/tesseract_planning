@@ -39,34 +39,25 @@ namespace tesseract_examples
  * @brief An example of a robot with fixed orientation but free to move in cartesian space
  * leveraging tesseract and trajopt to generate a motion trajectory.
  */
-class Xarm7Trajopt : public Example
+class Xarm7Trajopt
 {
 public:
   Xarm7Trajopt(tesseract_environment::Environment::Ptr env,
-                      tesseract_visualization::Visualization::Ptr plotter = nullptr,
-                      bool ifopt = false,
-                      bool debug = false,
-                      Eigen::Vector3d sphere1 = Eigen::Vector3d(0, 0, 0),
-                      Eigen::VectorXd arm_start = Eigen::VectorXd::Zero(7),
-                      Eigen::VectorXd arm_end = Eigen::VectorXd::Zero(7),
-                      Eigen::Isometry3d final_pose = Eigen::Isometry3d::Identity()
-                      );
-  ~Xarm7Trajopt() override = default;
-  Xarm7Trajopt(const Xarm7Trajopt&) = default;
-  Xarm7Trajopt& operator=(const Xarm7Trajopt&) = default;
-  Xarm7Trajopt(Xarm7Trajopt&&) = default;
-  Xarm7Trajopt& operator=(Xarm7Trajopt&&) = default;
+                tesseract_visualization::Visualization::Ptr plotter = nullptr
+                );
 
-  bool run() override final;
+  bool run(Eigen::VectorXd joint_start_pos, Eigen::Isometry3d final_pose);
 
 private:
-  bool ifopt_;
-  bool debug_;
-  Eigen::Vector3d sphere1_;
   Eigen::VectorXd arm_start_;
   Eigen::VectorXd arm_end_;
   Eigen::Isometry3d final_pose_;
-  static tesseract_environment::Command::Ptr addSphere(Eigen::Vector3d sphere1);
+
+  /** @brief Tesseract Manager Class (Required) */
+  tesseract_environment::Environment::Ptr env_;
+  /** @brief Tesseract Visualization Class (Optional)*/
+  tesseract_visualization::Visualization::Ptr plotter_;
+
 };
 
 }  // namespace tesseract_examples

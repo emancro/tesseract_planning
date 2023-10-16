@@ -68,57 +68,14 @@ static const std::string TRAJOPT_DEFAULT_NAMESPACE = "TrajOptMotionPlannerTask";
 namespace tesseract_examples
 {
 Xarm7Trajopt::Xarm7Trajopt(tesseract_environment::Environment::Ptr env,
-                                         tesseract_visualization::Visualization::Ptr plotter,
-                                         bool ifopt,
-                                         bool debug,
-                                         Eigen::Vector3d sphere1,
-                                         Eigen::VectorXd arm_start,
-                                         Eigen::VectorXd arm_end,
-                                         Eigen::Isometry3d final_pose
-                                         )
-  : Example(std::move(env), std::move(plotter)), ifopt_(ifopt), debug_(debug), sphere1_(sphere1), arm_start_(arm_start), arm_end_(arm_end), final_pose_(final_pose)
+                          tesseract_visualization::Visualization::Ptr plotter
+                          ) : env_(std::move(env)), plotter_(std::move(plotter))
 {
 }
 
-tesseract_environment::Command::Ptr Xarm7Trajopt::addSphere(Eigen::Vector3d position)
+// run with arm joint angle start and cartesion position end
+bool Xarm7Trajopt::run(Eigen::VectorXd joint_start_pos, Eigen::Isometry3d final_pose)
 {
-  // Add sphere to environment
-  Link link_sphere("sphere_attached");
-
-  Visual::Ptr visual = std::make_shared<Visual>();
-  visual->origin = Eigen::Isometry3d::Identity();
-  visual->origin.translation() = position;
-  visual->geometry = std::make_shared<tesseract_geometry::Sphere>(0.15);
-  link_sphere.visual.push_back(visual);
-
-  Collision::Ptr collision = std::make_shared<Collision>();
-  collision->origin = visual->origin;
-  collision->geometry = visual->geometry;
-  link_sphere.collision.push_back(collision);
-
-  Joint joint_sphere("joint_sphere_attached");
-  joint_sphere.parent_link_name = "base_link";
-  joint_sphere.child_link_name = link_sphere.getName();
-  joint_sphere.type = JointType::FIXED;
-
-  return std::make_shared<tesseract_environment::AddLinkCommand>(link_sphere, joint_sphere);
-}
-
-
-
-
-
-
-
-// run with arm joint angle start and position end
-
-bool Xarm7Trajopt::run()
-{
-  // Add sphere to environment
-  // Eigen::Vector3d pos(0.5, 0, 0.55);
-  // Command::Ptr cmd = addSphere(sphere1_);
-  // if (!env_->applyCommand(cmd))
-  //   return false;
 
   if (plotter_ != nullptr)
     plotter_->waitForConnection();
@@ -132,9 +89,6 @@ bool Xarm7Trajopt::run()
   joint_names.emplace_back("joint5");
   joint_names.emplace_back("joint6");
   joint_names.emplace_back("joint7");
-
-  Eigen::VectorXd joint_start_pos(7);
-  joint_start_pos = arm_start_;
 
   env_->setState(joint_names, joint_start_pos);
 
@@ -161,8 +115,8 @@ bool Xarm7Trajopt::run()
   std::cout << "selected_quat: " << "myQuaternion.vec() = " << selected_quat.vec() << std::endl; //Print out the orientation vector
 
 
-  if (debug_)
-    console_bridge::setLogLevel(console_bridge::LogLevel::CONSOLE_BRIDGE_LOG_DEBUG);
+  
+  console_bridge::setLogLevel(console_bridge::LogLevel::CONSOLE_BRIDGE_LOG_DEBUG);
 
   // Solve Trajectory
   CONSOLE_BRIDGE_logInform("xarm7_trajop upright plan example");
@@ -240,7 +194,7 @@ bool Xarm7Trajopt::run()
 
 
   // Create task
-  const std::string task_name = (ifopt_) ? "TrajOptIfoptPipeline" : "TrajOptPipeline";
+  const std::string task_name = "TrajOptPipeline";
   TaskComposerNode::UPtr task = factory.createTaskComposerNode(task_name);
   const std::string input_key = task->getInputKeys().front();
   const std::string output_key = task->getOutputKeys().front();
@@ -306,190 +260,4 @@ bool Xarm7Trajopt::run()
   return input.isSuccessful();
 }
 
-
-
-
-// run with arm joint angle start and end
-/*
-bool Xarm7Trajopt::run()
-{
-  // Add sphere to environment
-  // Eigen::Vector3d pos(0.5, 0, 0.55);
-  // Command::Ptr cmd = addSphere(sphere1_);
-  // if (!env_->applyCommand(cmd))
-  //   return false;
-
-  if (plotter_ != nullptr)
-    plotter_->waitForConnection();
-
-  // Set the robot initial state
-  std::vector<std::string> joint_names;
-  joint_names.emplace_back("joint1");
-  joint_names.emplace_back("joint2");
-  joint_names.emplace_back("joint3");
-  joint_names.emplace_back("joint4");
-  joint_names.emplace_back("joint5");
-  joint_names.emplace_back("joint6");
-  joint_names.emplace_back("joint7");
-
-  Eigen::VectorXd joint_start_pos(7);
-  joint_start_pos = arm_start_;
-  // joint_start_pos(0) = -0.4;
-  // joint_start_pos(1) = 0.2762;
-  // joint_start_pos(2) = -0.3;
-  // joint_start_pos(3) = 1.3348;
-  // joint_start_pos(4) = 0.0;
-  // joint_start_pos(5) = 1.4959;
-  // joint_start_pos(6) = 0.0;
-
-
-  Eigen::VectorXd joint_end_pos(7);
-  joint_end_pos = arm_end_;
-  // joint_end_pos(0) = 0.5;
-  // joint_end_pos(1) = 0.2762;
-  // joint_end_pos(2) = 0.0;
-  // joint_end_pos(3) = 1.3348;
-  // joint_end_pos(4) = 0.0;
-  // joint_end_pos(5) = 1.4959;
-  // joint_end_pos(6) = 0.0;
-
-  env_->setState(joint_names, joint_start_pos);
-
-  if (debug_)
-    console_bridge::setLogLevel(console_bridge::LogLevel::CONSOLE_BRIDGE_LOG_DEBUG);
-
-  // Solve Trajectory
-  CONSOLE_BRIDGE_logInform("xarm7_trajop upright plan example");
-
-  // Create Task Composer Plugin Factory
-  const std::string share_dir(TESSERACT_TASK_COMPOSER_DIR);
-  tesseract_common::fs::path config_path(share_dir + "/config/task_composer_plugins.yaml");
-  TaskComposerPluginFactory factory(config_path);
-
-  // Create Program
-  CompositeInstruction program(
-      "FREESPACE", CompositeInstructionOrder::ORDERED, ManipulatorInfo("manipulator", "base_link", "tool0"));
-
-  // Start and End Joint Position for the program
-  StateWaypointPoly wp0{ StateWaypoint(joint_names, joint_start_pos) };
-  StateWaypointPoly wp1{ StateWaypoint(joint_names, joint_end_pos) };
-
-  MoveInstruction start_instruction(wp0, MoveInstructionType::FREESPACE, "FREESPACE");
-  start_instruction.setDescription("Start Instruction");
-
-  // Plan freespace from start
-  // Assign a linear motion so cartesian is defined as the target
-  MoveInstruction plan_f0(wp1, MoveInstructionType::FREESPACE, "FREESPACE");
-  plan_f0.setDescription("freespace_plan");
-
-  // Add Instructions to program
-  program.appendMoveInstruction(start_instruction);
-  program.appendMoveInstruction(plan_f0);
-
-  // Print Diagnostics
-  program.print("Program: ");
-
-  // Create Executor
-  auto executor = factory.createTaskComposerExecutor("TaskflowExecutor");
-
-  // Create profile dictionary
-  auto profiles = std::make_shared<ProfileDictionary>();
-  if (ifopt_)
-  {
-    auto composite_profile = std::make_shared<TrajOptIfoptDefaultCompositeProfile>();
-    composite_profile->collision_cost_config->type = tesseract_collision::CollisionEvaluatorType::LVS_DISCRETE;
-    composite_profile->collision_cost_config->contact_manager_config = tesseract_collision::ContactManagerConfig(0.01);
-    composite_profile->collision_cost_config->collision_margin_buffer = 0.01;
-    composite_profile->collision_constraint_config->type = tesseract_collision::CollisionEvaluatorType::LVS_DISCRETE;
-    composite_profile->collision_constraint_config->contact_manager_config =
-        tesseract_collision::ContactManagerConfig(0.01);
-    composite_profile->collision_constraint_config->collision_margin_buffer = 0.01;
-    composite_profile->smooth_velocities = true;
-    composite_profile->smooth_accelerations = false;
-    composite_profile->smooth_jerks = false;
-    composite_profile->velocity_coeff = Eigen::VectorXd::Ones(1);
-    profiles->addProfile<TrajOptIfoptCompositeProfile>(TRAJOPT_IFOPT_DEFAULT_NAMESPACE, "FREESPACE", composite_profile);
-
-    auto plan_profile = std::make_shared<TrajOptIfoptDefaultPlanProfile>();
-    plan_profile->joint_coeff = Eigen::VectorXd::Ones(7);
-    plan_profile->cartesian_coeff = Eigen::VectorXd::Constant(6, 1, 5);
-    plan_profile->cartesian_coeff(0) = 0;
-    plan_profile->cartesian_coeff(1) = 0;
-    plan_profile->cartesian_coeff(2) = 0;
-    profiles->addProfile<TrajOptIfoptPlanProfile>(TRAJOPT_IFOPT_DEFAULT_NAMESPACE, "FREESPACE", plan_profile);
-  }
-  else
-  {
-    auto composite_profile = std::make_shared<TrajOptDefaultCompositeProfile>();
-    composite_profile->collision_cost_config.enabled = true;
-    composite_profile->collision_cost_config.type = trajopt::CollisionEvaluatorType::DISCRETE_CONTINUOUS;
-    composite_profile->collision_cost_config.safety_margin = 0.01;
-    composite_profile->collision_cost_config.safety_margin_buffer = 0.01;
-    composite_profile->collision_cost_config.coeff = 1;
-    composite_profile->collision_constraint_config.enabled = true;
-    composite_profile->collision_constraint_config.type = trajopt::CollisionEvaluatorType::DISCRETE_CONTINUOUS;
-    composite_profile->collision_constraint_config.safety_margin = 0.01;
-    composite_profile->collision_constraint_config.safety_margin_buffer = 0.01;
-    composite_profile->collision_constraint_config.coeff = 1;
-    composite_profile->smooth_velocities = true;
-    composite_profile->smooth_accelerations = false;
-    composite_profile->smooth_jerks = false;
-    composite_profile->velocity_coeff = Eigen::VectorXd::Ones(1);
-    profiles->addProfile<TrajOptCompositeProfile>(TRAJOPT_DEFAULT_NAMESPACE, "FREESPACE", composite_profile);
-
-    auto plan_profile = std::make_shared<TrajOptDefaultPlanProfile>();
-    plan_profile->cartesian_coeff = Eigen::VectorXd::Constant(6, 1, 5);
-    plan_profile->cartesian_coeff(0) = 0;
-    plan_profile->cartesian_coeff(1) = 0;
-    plan_profile->cartesian_coeff(2) = 0;
-
-    // Add profile to Dictionary
-    profiles->addProfile<TrajOptPlanProfile>(TRAJOPT_DEFAULT_NAMESPACE, "FREESPACE", plan_profile);
-  }
-
-  // Create task
-  const std::string task_name = (ifopt_) ? "TrajOptIfoptPipeline" : "TrajOptPipeline";
-  TaskComposerNode::UPtr task = factory.createTaskComposerNode(task_name);
-  const std::string input_key = task->getInputKeys().front();
-  const std::string output_key = task->getOutputKeys().front();
-
-  // Create Task Input Data
-  TaskComposerDataStorage input_data;
-  input_data.setData(input_key, program);
-
-  // Create Task Composer Problem
-  auto problem = std::make_unique<PlanningTaskComposerProblem>(env_, input_data, profiles);
-
-  if (plotter_ != nullptr && plotter_->isConnected())
-    plotter_->waitForInput("Hit Enter to solve for trajectory.");
-
-  // Solve process plan
-  tesseract_common::Timer stopwatch;
-  stopwatch.start();
-  TaskComposerInput input(std::move(problem));
-  TaskComposerFuture::UPtr future = executor->run(*task, input);
-  future->wait();
-
-  stopwatch.stop();
-  CONSOLE_BRIDGE_logInform("Planning took %f seconds.", stopwatch.elapsedSeconds());
-
-  // Plot Process Trajectory
-  if (plotter_ != nullptr && plotter_->isConnected())
-  {
-    plotter_->waitForInput();
-    auto ci = input.data_storage.getData(output_key).as<CompositeInstruction>();
-    tesseract_common::Toolpath toolpath = toToolpath(ci, *env_);
-    tesseract_common::JointTrajectory trajectory = toJointTrajectory(ci);
-    auto state_solver = env_->getStateSolver();
-
-    plotter_->plotMarker(ToolpathMarker(toolpath));
-    plotter_->plotTrajectory(trajectory, *state_solver);
-  }
-
-  CONSOLE_BRIDGE_logInform("Final trajectory is collision free");
-  return input.isSuccessful();
 }
-*/
-
-
-}  // namespace tesseract_examples
